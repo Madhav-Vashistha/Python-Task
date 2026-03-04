@@ -1,36 +1,49 @@
 import random
 
-words = ["python", "apple", "chair", "table", "mouse"]
+words = [
+    "python", "computer", "keyboard", "monitor", "science",
+    "program", "college", "student", "internet", "network"
+]
 
 score = 0
+play_again = "yes"
 
-print("Word Scramble Game")
+print("Word Scrambling Game")
 
-word = random.choice(words)
+while play_again == "yes":
 
-letters = list(word)
-random.shuffle(letters)
+    word = random.choice(words)
 
-scrambled = ""
-for letter in letters:
-    scrambled = scrambled + letter
+    letters = list(word)
+    random.shuffle(letters)
+    scrambled_word = ""
+    for letter in letters:
+        scrambled_word = scrambled_word + letter
 
-print("Guess the word:", scrambled)
+    print("\nScrambled word:", scrambled_word)
 
-attempts = 3
+    attempts = 3
+    guessed_correctly = False
 
-while attempts > 0:
-    guess = input("Enter your guess: ")
+    while attempts > 0:
+        guess = input("Enter your guess: ")
 
-    if guess == word:
-        print("Correct!")
-        score = score + 1
-        break
-    else:
-        print("Wrong")
-        attempts = attempts - 1
+        if guess.lower() == word:
+            print("Correct guess!")
+            score = score + 1
+            guessed_correctly = True
+            break
+        else:
+            attempts = attempts - 1
+            print("Wrong guess. Attempts left:", attempts)
 
-if attempts == 0:
-    print("You lost. The correct word was:", word)
+    if guessed_correctly == False:
+        print("You failed to guess the word.")
+        print("The correct word was:", word)
 
-print("Your score is:", score)
+    print("Current Score:", score)
+
+    play_again = input("Do you want to play another round? (yes/no): ")
+
+print("Final Score:", score)
+print("Game Over")
