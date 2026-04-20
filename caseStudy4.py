@@ -1,0 +1,166 @@
+import os
+
+# Define the file where tasks will be stored persistently
+FILE_NAME = "tasks.txt"
+
+def initialize_file():
+    """Ensures the file exists before performing operations."""
+    if not os.path.exists(FILE_NAME):
+        # Create an empty file if it doesn't exist
+        with open(FILE_NAME, 'w') as file:
+            pass 
+
+def add_task():
+    """Adds a new task to the file (Create / Append)."""
+    print("\n--- Add New Task ---")
+    task_id = input("Enter Task ID: ").strip()
+    
+    # Check if ID already exists
+    if _task_exists(task_id):
+        print("[!] Error: A task with this ID already exists.")
+        return
+
+    description = input("Enter Task Description: ").strip()
+    status = "Pending"  # Default status for a new task
+
+    # Append the new task to the file
+    with open(FILE_NAME, 'a') as file:
+        file.write(f"{task_id}|{description}|{status}\n")
+    print(f"[*] Task '{task_id}' added successfully!")
+
+def view_tasks():
+    """Displays all tasks stored in the file (Read)."""
+    print("\n--- All Tasks ---")
+    if os.path.getsize(FILE_NAME) == 0:
+        print("No tasks found. Your to-do list is empty.")
+        return
+
+    print(f"{'Task ID':<10} | {'Description':<30} | {'Status'}")
+    print("-" * 60)
+    
+    with open(FILE_NAME, 'r') as file:
+        # Utilizing seek(0) to ensure we read from the beginning (meets objective requirement)
+        file.seek(0) 
+        for line in file:
+            task_id, desc, status = line.strip().split('|')
+            print(f"{task_id:<10} | {desc:<30} | {status}")
+
+def update_task():
+    """Modifies task description or marks as completed (Update)."""
+    print("\n--- Update Task ---")
+    task_id = input("Enter Task ID to update: ").strip()
+    
+    if not _task_exists(task_id):
+        print("[!] Error: Task ID not found.")
+        return
+
+    tasks = _read_all_tasks()
+    
+    with open(FILE_NAME, 'w') as file:
+        for task in tasks:
+            t_id, desc, status = task.strip().split('|')
+            if t_id == task_id:
+                print(f"Current Description: {desc}")
+                print(f"Current Status: {status}")
+                
+                new_desc = input("Enter new description (or press Enter to keep current): ").strip()
+                new_status = input("Mark as 'Completed'? (y/n): ").strip().lower()
+                
+                desc = new_desc if new_desc else desc
+                status = "Completed" if new_status == 'y' else status
+                
+                print(f"[*] Task '{task_id}' updated successfully!")
+            
+            # Write back to file
+            file.write(f"{t_id}|{desc}|{status}\n")
+
+def delete_task():
+    """Removes a task using Task ID (Delete)."""
+    print("\n--- Delete Task ---")
+    task_id = input("Enter Task ID to delete: ").strip()
+    
+    if not _task_exists(task_id):
+        print("[!] Error: Task ID not found.")
+        return
+
+    tasks = _read_all_tasks()
+    
+    with open(FILE_NAME, 'w') as file:
+        for task in tasks:
+            t_id, _, _ = task.strip().split('|')
+            if t_id != task_id:  # Only write tasks that DO NOT match the ID
+                file.write(task)
+                
+    print(f"[*] Task '{task_id}' deleted successfully!")
+
+def search_task():
+    """Searches for a task by keyword or ID (Optional Advanced)."""
+    print("\n--- Search Tasks ---")
+    query = input("Enter Task ID or Keyword to search: ").strip().lower()
+    
+    found = False
+    print(f"\n{'Task ID':<10} | {'Description':<30} | {'Status'}")
+    print("-" * 60)
+    
+    with open(FILE_NAME, 'r') as file:
+        for line in file:
+            if query in line.lower():
+                task_id, desc, status = line.strip().split('|')
+                print(f"{task_id:<10} | {desc:<30} | {status}")
+                found = True
+                
+    if not found:
+        print(f"No tasks found matching '{query}'.")
+
+# --- Helper Functions ---
+
+def _task_exists(task_id):
+    """Helper function to check if a task ID exists in the file."""
+    with open(FILE_NAME, 'r') as file:
+        for line in file:
+            t_id, _, _ = line.strip().split('|')
+            if t_id == task_id:
+                return True
+    return False
+
+def _read_all_tasks():
+    """Helper function to read all tasks into a list."""
+    with open(FILE_NAME, 'r') as file:
+        return file.readlines()
+
+# --- Main Program Loop ---
+
+def main():
+    initialize_file()
+    
+    while True:
+        print("\n" + "="*30)
+        print("   TO-DO NOTES BUILDER")
+        print("="*30)
+        print("1. Add Task")
+        print("2. View Tasks")
+        print("3. Update Task")
+        print("4. Delete Task")
+        print("5. Search Task")
+        print("6. Exit")
+        
+        choice = input("\nEnter your choice (1-6): ").strip()
+        
+        if choice == '1':
+            add_task()
+        elif choice == '2':
+            view_tasks()
+        elif choice == '3':
+            update_task()
+        elif choice == '4':
+            delete_task()
+        elif choice == '5':
+            search_task()
+        elif choice == '6':
+            print("Exiting application. Your tasks are safely saved!")
+            break
+        else:
+            print("[!] Invalid choice. Please enter a number between 1 and 6.")
+
+if __name__ == "__main__":
+    main()
